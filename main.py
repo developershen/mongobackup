@@ -4,6 +4,7 @@ from bson.json_util import dumps, loads
 import settings
 import json
 
+
 def backup_db(backup_db_dir = '.'):
     client = pymongo.MongoClient(host= settings.DATABASE_HOST, port=settings.DATABASE_PORT)
     database = client[settings.DATABASE_NAME]
@@ -37,7 +38,7 @@ def add_collections_to_db(backup_db_dir):
         assert authenticated, "Could not authenticate to database!"
     collections = database.collection_names()
     for filename in listdir(backup_db_dir):
-        if filename.endswith("submissions.json"):
+        if filename.endswith(".json"):
                 page = open(path.join(backup_db_dir,filename), 'r')
                 print(filename)
                 parsed = loads(page.read())
