@@ -1,7 +1,8 @@
-from os import path, makedirs
+from os import path, makedirs, listdir
 import pymongo
-from bson.json_util import dumps
+from bson.json_util import dumps, loads
 import settings
+import json
 
 def backup_db(backup_db_dir = '.'):
     client = pymongo.MongoClient(host= settings.DATABASE_HOST, port=settings.DATABASE_PORT)
@@ -26,5 +27,27 @@ def backup_db(backup_db_dir = '.'):
             print(dump)
             jsonfile.write(dump)
 
+def add_collections_to_db(backup_db_dir):
+    client = pymongo.MongoClient(host= settings.MIGRATE_TO_DATABASE_HOST, port=settings.MIGRATE_TO_DATABASE_PORT)
+    print (client)
+    database = client[settings.MIGRATE_TO_DATABASE_NAME]
+
+    if settings.MIGRATE_TO_AUTHENTICATE is not False:
+        authenticated = database.authenticate(settings.MIGRATE_TO_DATABASE_USERNAME,settings.MIGRATE_TO_DATABASE_PASSWORD)
+        assert authenticated, "Could not authenticate to database!"
+    collections = database.collection_names()
+    for filename in listdir(backup_db_dir):
+        if filename.endswith("submissions.json"):
+                page = open(path.join(backup_db_dir,filename), 'r')
+                print(filename)
+                parsed = loads(page.read())
+                collection = database[path.splitext(filename)[0]]
+                for item in parsed:
+                    print(item)
+                    collection.insert(item)
+        else:
+            continue
+
 
 backup_db('dumps')
+add_collections_to_db('dumps')
