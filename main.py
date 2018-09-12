@@ -15,22 +15,17 @@ def backup_db(backup_db_dir = '.'):
     for i, collection_name in enumerate(collections):
         col = getattr(database,collections[i])
         collection = col.find()
-        print(collection_name)
-        print(collection)
         jsonpath = collection_name + ".json"
 
         if not path.exists(backup_db_dir):
             makedirs(backup_db_dir)
         jsonpath = path.join(backup_db_dir, jsonpath)
-        print (jsonpath)
         with open(jsonpath, 'w') as jsonfile:
             dump = dumps(collection)
-            print(dump)
             jsonfile.write(dump)
 
 def add_collections_to_db(backup_db_dir):
     client = pymongo.MongoClient(host= settings.MIGRATE_TO_DATABASE_HOST, port=settings.MIGRATE_TO_DATABASE_PORT)
-    print (client)
     database = client[settings.MIGRATE_TO_DATABASE_NAME]
 
     if settings.MIGRATE_TO_AUTHENTICATE is not False:
@@ -40,11 +35,9 @@ def add_collections_to_db(backup_db_dir):
     for filename in listdir(backup_db_dir):
         if filename.endswith(".json"):
                 page = open(path.join(backup_db_dir,filename), 'r')
-                print(filename)
                 parsed = loads(page.read())
                 collection = database[path.splitext(filename)[0]]
                 for item in parsed:
-                    print(item)
                     collection.insert(item)
         else:
             continue
